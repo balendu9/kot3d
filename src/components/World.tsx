@@ -11,6 +11,7 @@ import { Suspense, useMemo, useState, useEffect } from 'react'
 import * as THREE from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
 
+
 const Modal = ({
   tileId, onClose, onBuy
 }: {
@@ -192,22 +193,28 @@ const Tile = ({
 
 const TileGrid = ({
   onTileClick,
-  purchasedTiles = []
+  purchasedTiles = [],
+  setTilePositionMap
 }: {
   onTileClick: (id: number) => void
   purchasedTiles?: number[]
+  setTilePositionMap: (map: Map<number, [number, number, number]>) => void
 }) => {
   const tiles = []
   let id = 1
+
+  const positionMap = new Map<number, [number, number, number]>()
 
   for (let i = -2; i <= 2; i++) {
     for (let j = -2; j <= 2; j++) {
       const x = i * TILE_SIZE
       const z = j * TILE_SIZE
+      const position: [number, number, number] = [x, 0.1, z]
+      positionMap.set(id, position)
       tiles.push(
         <Tile
           key={id}
-          position={[x, 0.1, z]}
+          position={position}
           tileId={id}
           onClick={onTileClick}
           purchased={purchasedTiles.includes(id)}
@@ -216,13 +223,22 @@ const TileGrid = ({
       id++
     }
   }
+  useEffect(() => {
+    setTilePositionMap(positionMap)
+  }, [])
+  
 
   return <group>{tiles}</group>
 }
 
 const World = () => {
+  const [tilePositionMap, setTilePositionMap] = useState<Map<number, [number, number, number]>>(new Map())
+
   const [selectedTile, setSelectedTile] = useState<number | null>(null)
   const [purchasedTiles, setPurchasedTiles] = useState<number[]>([])
+
+  const [builtOnTile, setBuiltOnTile] = useState<Record<number, {type: string; model: string}>>({})
+  const [showBuildModal, setShowBuildModal] = useState<number | null>(null)
 
   const [assetPositions, setAssetPositions] = useState<
     { pos: THREE.Vector3; radius: number; model: string; scale: number }[]
@@ -236,7 +252,7 @@ const World = () => {
     { model: '/models/tree_palmDetailedTall.glb', scaleRange: [4, 6]},
     { model: '/models/tent_detailedOpen.glb', scaleRange: [4, 6]},
     { model: '/models/tent_detailedClosed.glb', scaleRange: [4, 6]},
-    { model: '/models/tent_smallClosed.glb', scaleRange: [4, 6]},
+    
     { model: '/models/tent_detailedOpen.glb', scaleRange: [4, 6]},
     { model: '/models/tree_oak.glb', scaleRange: [3.5, 5] },
     { model: '/models/tree_cone.glb', scaleRange: [4, 6] },
@@ -259,6 +275,79 @@ const World = () => {
     { model: '/models/tree_tall.glb', scaleRange: [4, 6]},
     { model: '/models/tree_pineTallD.glb', scaleRange: [4, 6]}
   ]
+
+    const BuildModal = ({
+      tileId,
+      onBuild, 
+      onClose
+    }: {
+      tileId: number
+      onBuild: (id: number, type: string, model: string) => void
+      onClose: () => void
+    }) => {
+      const options = [
+        { label: 'Farm 1', type: 'farm', model: '/models/tent_smallClosed.glb'},
+        { label: 'Farm 2', type: 'farm', model: '/models/tent_smallClosed.glb'},
+        { label: 'Farm 3', type: 'farm', model: '/models/tent_smallClosed.glb'},
+        { label: 'Farm 4', type: 'farm', model: '/models/tent_smallClosed.glb'},
+        { label: 'Factory 1', type: 'farm', model: '/models/tent_smallClosed.glb'},
+        { label: 'Factory 2', type: 'farm', model: '/models/tent_smallClosed.glb'},
+        { label: 'Factory 3', type: 'farm', model: '/models/tent_smallClosed.glb'},
+        { label: 'Factory 4', type: 'farm', model: '/models/tent_smallClosed.glb'},
+        { label: 'Factory 5', type: 'farm', model: '/models/tent_smallClosed.glb'},
+        ]
+
+        return (
+          <div 
+            style ={{
+              position: 'fixed',
+              top: 0, left: 0, width: '100vw', height: '100vh',
+              background: 'rgba(0,0,0,0.5)',
+              display: 'flex', justifyContent: 'center', alignItems: 'center',
+              zIndex: 1000
+            }}
+            onClick={onClose}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: '#fff',
+                borderRadius: 10,
+                padding: 20,
+                minWidth: 300,
+                maxWidth: 400
+              }}
+            >
+              <h3>Build on Tile #{tileId}</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: 10 }}>
+                {options.map((opt) => (
+                  <button
+                    key={opt.label}
+                    onClick={() => {
+                      onBuild(tileId, opt.type, opt.model)
+                      onClose()
+                    }}
+                    style={{
+                      flex: '1 0 45%',
+                      padding: '8px',
+                      border: '1px solid #aaa',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      background: '#eee'
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+    }
+
+
+
+
 
   // On mount, generate random assets positions collision-free
   useEffect(() => {
@@ -320,8 +409,22 @@ const World = () => {
   }, [])
 
   const handleTileClick = (id: number) => {
-    setSelectedTile(id)
+    if (purchasedTiles.includes(id)) {
+      setShowBuildModal(id) //already owned -> show build options
+    } else {
+      setSelectedTile(id) //not yet bought -> show buy dialog
+    }
+    
   }
+
+  const handleBuild = (tileId: number, type: string, model: string) => {
+    setBuiltOnTile((prev) => ({
+      ...prev,
+      [tileId]: {type, model}
+    }))
+  }
+
+
 
   const handleBuy = (id: number) => {
     if (!purchasedTiles.includes(id)) {
@@ -365,7 +468,43 @@ const World = () => {
         <Suspense fallback={null}>
           <TileGrid onTileClick={handleTileClick} 
            purchasedTiles={purchasedTiles}
+           setTilePositionMap={setTilePositionMap}
           />
+          {/* {Object.entries(builtOnTile).map(([id, { model }]) => {
+            const tileId = parseInt(id)
+            const row = Math.floor((tileId - 1) / TILE_GRID_SIZE)
+            const col = (tileId - 1) % TILE_GRID_SIZE
+            // const x = (col - 2) * TILE_SIZE
+            // const z = (row - 2) * TILE_SIZE
+
+            const x = (col - Math.floor(TILE_GRID_SIZE / 2)) * TILE_SIZE 
+            const z = (row - Math.floor(TILE_GRID_SIZE / 2)) * TILE_SIZE
+
+            return (
+              <Asset
+                key={`structure-${tileId}`}
+                modelPath={model}
+                position={[x, 0.2, z]}
+                scale={1.5} // you can adjust per model
+              />
+              )
+          })} */}
+
+          {Object.entries(builtOnTile).map(([tileId, { model, scale }]) => {
+            const id = parseInt(tileId)
+            const pos = tilePositionMap.get(id)
+            if (!pos) return null
+
+            return (
+              <Asset
+                key={`structure-${id}`}
+                modelPath={model}
+                position={[pos[0], 0.2, pos[2]]}
+                scale={scale}
+              />
+            )
+          })}
+
 
           {/* Render assets dynamically */}
           {assetPositions.map(({ pos, model, scale }, i) => (
@@ -402,6 +541,15 @@ const World = () => {
           onBuy={handleBuy}
         />
       )}
+
+      {showBuildModal !== null && (
+        <BuildModal
+          tileId={showBuildModal}
+          onClose={() => setShowBuildModal(null)}
+          onBuild={handleBuild}
+        />
+      )}
+
     </>
   )
 }
