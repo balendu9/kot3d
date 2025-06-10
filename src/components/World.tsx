@@ -530,9 +530,9 @@ const World = () => {
         />
 
         <OrbitControls 
-            maxPolarAngle = {Math.PI / 2}
-            minPolarAngle = {Math.PI / 6}            
-            minDistance = {5}
+            maxPolarAngle = {Math.PI / 2.1}
+            minPolarAngle = {Math.PI / 4}            
+            minDistance = {7}
             maxDistance = {50}
             enablePan = {true}
         />
