@@ -107,7 +107,7 @@ const Asset = ({ modelPath, position, scale = 1 }: any) => {
 }
 
 const TILE_GRID_SIZE = 5
-const TILE_SIZE = 2
+const TILE_SIZE = 4
 
 // Area covered by tile grid (square around center)
 const TILE_GRID_BOUND = (TILE_GRID_SIZE / 2) * TILE_SIZE + 1 // +1 for buffer
@@ -169,7 +169,9 @@ const Tile = ({
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      <boxGeometry args={[1.8, 0.2, 1.8]} />
+      {/* <boxGeometry args={[1.8, 0.2, 1.8]} /> */}
+      <boxGeometry args={[TILE_SIZE - 0.2, 0.2, TILE_SIZE - 0.2]} />
+
       <meshStandardMaterial color={color} />
       <Html center distanceFactor={10} position={[0, 0.6, 0]}>
         <div
@@ -286,8 +288,8 @@ const World = () => {
       onClose: () => void
     }) => {
       const options = [
-        { label: 'Farm 1', type: 'farm', model: '/models/tent_smallClosed.glb'},
-        { label: 'Farm 2', type: 'farm', model: '/models/tent_smallClosed.glb'},
+        { label: 'Farm 1', type: 'farm', model: '/models/crop_carrot.glb'},
+        { label: 'Farm 2', type: 'farm', model: '/models/crop_pumpkin.glb'},
         { label: 'Farm 3', type: 'farm', model: '/models/tent_smallClosed.glb'},
         { label: 'Farm 4', type: 'farm', model: '/models/tent_smallClosed.glb'},
         { label: 'Factory 1', type: 'farm', model: '/models/tent_smallClosed.glb'},
@@ -328,6 +330,7 @@ const World = () => {
                       onClose()
                     }}
                     style={{
+                      color: 'black',
                       flex: '1 0 45%',
                       padding: '8px',
                       border: '1px solid #aaa',
@@ -344,10 +347,6 @@ const World = () => {
           </div>
         )
     }
-
-
-
-
 
   // On mount, generate random assets positions collision-free
   useEffect(() => {
@@ -438,23 +437,27 @@ const World = () => {
       <Canvas
         shadows
         camera={{ position: [16, 12, 16], fov: 50 }}
-        gl={{ antialias: true }}
+        gl={{ antialias: true}}
         style={{ background: '#87ceeb' }}
       >
         <fog attach="fog" args={['#87ceeb', 30, 90]} />
 
-        <ambientLight intensity={0.6} />
+        {/* <ambientLight intensity={0.6} /> */}
+        <hemisphereLight intensity={0.6} groundColor = "white" />
         <directionalLight
           position={[20, 30, 10]}
           castShadow
-          intensity={1.6}
-          shadow-mapSize-width={4096}
-          shadow-mapSize-height={4096}
+          intensity={1.8}
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
           shadow-bias={-0.0001}
+          color= "#fffdd0"
         />
 
-        <Sky sunPosition={[100, 20, 100]} turbidity={7} rayleigh={1} />
-        <Environment preset="forest" />
+        <Sky sunPosition={[100, 30, 100]} turbidity={10} rayleigh={2} 
+          // mieCoefficient={0.005} mieDirectionalG={0.8}
+        />
+        <Environment preset="forest" background={false} />
 
         <mesh
           receiveShadow
@@ -500,7 +503,7 @@ const World = () => {
                 key={`structure-${id}`}
                 modelPath={model}
                 position={[pos[0], 0.2, pos[2]]}
-                scale={scale}
+                scale={TILE_SIZE * 0.9}
               />
             )
           })}
@@ -518,11 +521,11 @@ const World = () => {
         </Suspense>
 
         <ContactShadows
-          position={[0, 0.1, 0]}
-          opacity={0.5}
-          scale={30}
-          blur={2}
-          far={20}
+          position={[0, 0.05, 0]}
+          opacity={0.6}
+          scale={50}
+          blur={3}
+          far={30}
         />
 
         <OrbitControls 
