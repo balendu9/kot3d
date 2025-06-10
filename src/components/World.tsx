@@ -1,4 +1,4 @@
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import {
   OrbitControls,
   useGLTF,
@@ -113,39 +113,39 @@ const TILE_SIZE = 4
 const TILE_GRID_BOUND = (TILE_GRID_SIZE / 2) * TILE_SIZE + 1 // +1 for buffer
 
 // Randomly generate assets positions without collision in a square area excluding tile grid zone
-function generateAssetsPositions(
-  count: number,
-  radius: number,
-  excludedZone: number,
-  existingPositions: { pos: THREE.Vector3; radius: number }[] = []
-) {
-  const positions: { pos: THREE.Vector3; radius: number }[] = []
-  let tries = 0
-  const maxTries = count * 20
+// function generateAssetsPositions(
+//   count: number,
+//   radius: number,
+//   excludedZone: number,
+//   existingPositions: { pos: THREE.Vector3; radius: number }[] = []
+// ) {
+//   const positions: { pos: THREE.Vector3; radius: number }[] = []
+//   let tries = 0
+//   const maxTries = count * 20
 
-  while (positions.length < count && tries < maxTries) {
-    tries++
+//   while (positions.length < count && tries < maxTries) {
+//     tries++
 
-    // Random x,z around center (square area)
-    const x = (Math.random() - 0.5) * radius * 2
-    const z = (Math.random() - 0.5) * radius * 2
+//     // Random x,z around center (square area)
+//     const x = (Math.random() - 0.5) * radius * 2
+//     const z = (Math.random() - 0.5) * radius * 2
 
-    // Skip if inside tile grid zone + buffer
-    if (Math.abs(x) < excludedZone && Math.abs(z) < excludedZone) continue
+//     // Skip if inside tile grid zone + buffer
+//     if (Math.abs(x) < excludedZone && Math.abs(z) < excludedZone) continue
 
-    const newPos = new THREE.Vector3(x, 0, z)
-    const newRadius = 2 // radius for collision around asset (adjust if needed)
+//     const newPos = new THREE.Vector3(x, 0, z)
+//     const newRadius = 2 // radius for collision around asset (adjust if needed)
 
-    // Check collision with already placed assets + existingPositions
-    const collision = [...positions, ...existingPositions].some(({ pos, radius }) =>
-      pos.distanceTo(newPos) < radius + newRadius
-    )
-    if (collision) continue
+//     // Check collision with already placed assets + existingPositions
+//     const collision = [...positions, ...existingPositions].some(({ pos, radius }) =>
+//       pos.distanceTo(newPos) < radius + newRadius
+//     )
+//     if (collision) continue
 
-    positions.push({ pos: newPos, radius: newRadius })
-  }
-  return positions
-}
+//     positions.push({ pos: newPos, radius: newRadius })
+//   }
+//   return positions
+// }
 
 const Tile = ({
   position,
@@ -248,34 +248,34 @@ const World = () => {
 
   // Asset types info
   const assetTypes = [
-    { model: '/models/tree_oak.glb', scaleRange: [3.5, 5] },
-    { model: '/models/tree_cone.glb', scaleRange: [4, 6] },
-    { model: '/models/tree_thin.glb', scaleRange: [2, 3] },
-    { model: '/models/tree_palmDetailedTall.glb', scaleRange: [4, 6]},
-    { model: '/models/tent_detailedOpen.glb', scaleRange: [4, 6]},
-    { model: '/models/tent_detailedClosed.glb', scaleRange: [4, 6]},
+    { model: '/models/tree_oak.glb', scaleRange: [1,3] },
+    { model: '/models/tree_cone.glb', scaleRange: [1,3] },
+    { model: '/models/tree_thin.glb', scaleRange: [1,3] },
+    { model: '/models/tree_palmDetailedTall.glb', scaleRange: [1,3]},
+    { model: '/models/tent_detailedOpen.glb', scaleRange: [1,3]},
+    { model: '/models/tent_detailedClosed.glb', scaleRange: [1,3]},
     
     { model: '/models/tent_detailedOpen.glb', scaleRange: [4, 6]},
     { model: '/models/tree_oak.glb', scaleRange: [3.5, 5] },
-    { model: '/models/tree_cone.glb', scaleRange: [4, 6] },
-    { model: '/models/tree_thin.glb', scaleRange: [2, 3] },
-    { model: '/models/tree_palmDetailedTall.glb', scaleRange: [4, 6]},
+    { model: '/models/tree_cone.glb', scaleRange: [1,3] },
+    { model: '/models/tree_thin.glb', scaleRange: [1,3] },
+    { model: '/models/tree_palmDetailedTall.glb', scaleRange: [1,3]},
 
-    { model: '/models/tree_blocks_fall.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_cone_fall.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_default.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_detailed.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_fat.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_palm.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_palmBend.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_palmTall.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_pineDefaultA.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_pineGroundA.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_pineRoundB.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_pineTallA.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_plateau.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_tall.glb', scaleRange: [4, 6]},
-    { model: '/models/tree_pineTallD.glb', scaleRange: [4, 6]}
+    { model: '/models/tree_blocks_fall.glb', scaleRange: [1,3]},
+    { model: '/models/tree_cone_fall.glb', scaleRange: [1,3]},
+    { model: '/models/tree_default.glb', scaleRange: [1,3]},
+    { model: '/models/tree_detailed.glb', scaleRange: [1,3]},
+    { model: '/models/tree_fat.glb', scaleRange: [1,3]},
+    { model: '/models/tree_palm.glb', scaleRange: [1,3]},
+    { model: '/models/tree_palmBend.glb', scaleRange: [1,3]},
+    { model: '/models/tree_palmTall.glb', scaleRange: [1,3]},
+    { model: '/models/tree_pineDefaultA.glb', scaleRange: [1,3]},
+    { model: '/models/tree_pineGroundA.glb', scaleRange: [1,3]},
+    { model: '/models/tree_pineRoundB.glb', scaleRange: [1,3]},
+    { model: '/models/tree_pineTallA.glb', scaleRange: [1,3]},
+    { model: '/models/tree_plateau.glb', scaleRange: [1,3]},
+    { model: '/models/tree_tall.glb', scaleRange: [1,3]},
+    { model: '/models/tree_pineTallD.glb', scaleRange: [1,3]}
   ]
 
     const BuildModal = ({
@@ -358,7 +358,7 @@ const World = () => {
     }[] = []
 
     const totalAssets = 100
-    const worldRadius = 50 // larger environment area
+    const worldRadius = 20 // larger environment area
     const excludedZone = TILE_GRID_BOUND
 
     for (let i = 0; i < totalAssets; i++) {
@@ -493,7 +493,7 @@ const World = () => {
               )
           })} */}
 
-          {Object.entries(builtOnTile).map(([tileId, { model, scale }]) => {
+          {Object.entries(builtOnTile).map(([tileId, { model }]) => {
             const id = parseInt(tileId)
             const pos = tilePositionMap.get(id)
             if (!pos) return null
