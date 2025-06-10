@@ -11,9 +11,8 @@ import {
 import { Suspense, useMemo, useState, useEffect } from 'react'
 import * as THREE from 'three'
 // import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { clone } from 'three-stdlib'
 
-
+import { SkeletonUtils } from 'three-stdlib'
 
 const Modal = ({
   tileId, onClose, onBuy
@@ -87,7 +86,7 @@ const Modal = ({
 }
 const Asset = ({ modelPath, position, scale = 1 }: any) => {
   const { scene } = useGLTF(modelPath)
-  const model = useMemo(() => clone(scene), [scene])
+  const model = useMemo(() => SkeletonUtils.clone(scene), [scene])
 
   model.traverse((child: any) => {
     if (child.isMesh) {
