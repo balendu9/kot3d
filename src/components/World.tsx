@@ -11,7 +11,8 @@ import {
 import { Suspense, useMemo, useState, useEffect } from 'react'
 import * as THREE from 'three'
 // import { clone } from 'three/examples/jsm/utils/SkeletonUtils'
-import { clone } from 'three-stdlib/utils/SkeletonUtils'
+import { clone } from 'three-stdlib'
+
 
 
 const Modal = ({
